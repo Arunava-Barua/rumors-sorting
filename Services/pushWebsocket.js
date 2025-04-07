@@ -88,7 +88,7 @@ const startWebsocket = async () => {
               bytes: String,
             });
 
-            await updateVotes(1, upvoteObject);
+            await updateVotes(1, upvoteObject, pushChain);
           } else {
             console.warn(`No details found for transaction hash ${tx.hash}`);
           }
@@ -121,7 +121,7 @@ const startWebsocket = async () => {
               bytes: String,
             });
 
-            await updateVotes(0, downvoteObject);
+            await updateVotes(0, downvoteObject, pushChain);
           } else {
             console.warn(`No details found for transaction hash ${tx.hash}`);
           }

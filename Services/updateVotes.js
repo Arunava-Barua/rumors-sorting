@@ -5,16 +5,37 @@
 */
 const { updateVotesByTxnHash } = require("../Models/updateVotesByTxnHash.js");
 const { getRumourByTxnHash } = require("../Models/getRumourByTxnHash.js");
+const { addSingleRumour } = require("../Models/addSingleRumour.js");
 
-const updateVotes = async (voteType, voteObject) => {
+const { Confession } = require("../Schema/schema.js");
+
+const updateVotes = async (voteType, voteObject, pushChain) => {
   try {
     const { rumourHash, address } = voteObject;
 
     // 1. Fetch current vote data by rumourHash
-    const existingVote = await getRumourByTxnHash(rumourHash);
+    let existingVote = await getRumourByTxnHash(rumourHash);
 
     if (!existingVote.rumour) {
-      throw new Error("Rumour not found");
+      const txDetails = await pushChain.tx.get(rumourHash);
+
+      if (txDetails.blocks && txDetails.blocks.length > 0) {
+        const fetchedTx = txDetails.blocks[0].transactions[0];
+        // Log the transaction data from the fetched transaction details
+        const dataBytes = new Uint8Array(Buffer.from(fetchedTx.data, "hex"));
+        const decodedData = Confession.decode(dataBytes);
+
+        // Convert to plain object
+        const confessionObject = Confession.toObject(decodedData, {
+          longs: String,
+          enums: String,
+          bytes: String,
+        });
+
+        await addSingleRumour({ ...confessionObject, txnHash: tx.hash });
+      }
+
+      existingVote = await getRumourByTxnHash(rumourHash);
     }
 
     let upVotes = existingVote.rumour.upvotes || [];
