@@ -3,18 +3,18 @@ const { PushChain } = require("@pushchain/devnet");
 const protobuf = require("protobufjs");
 
 const { calculateVote } = require("./calculateVote.js");
-const { ENV, CONSTANTS } = require("@pushchain/devnet/src/lib/constants.js");
-const {
-  TxCategory,
-} = require("@pushprotocol/push-chain/src/lib/tx/tx.types.js");
 
-const getConfessions = async (page, pageSize = 10) => {
+
+const getConfessions = async (
+  page,
+  pageSize = 30,
+  start = Math.floor(Date.now())
+) => {
   try {
     // Initialize PushNetwork class instance
     // const userAlice = await PushNetwork.initialize("dev");
     const userAlice = await PushChain.initialize(null, {
-      rpcUrl:
-        `${process.env.SEPOLIA_RPC}`,
+      rpcUrl: `${process.env.SEPOLIA_RPC}`,
       printTraces: true,
     });
     console.log("User Alice intialized");
@@ -41,7 +41,7 @@ const getConfessions = async (page, pageSize = 10) => {
     const txRes = await userAlice.tx.get("*", {
       raw: true,
       category: "CUSTOM:RUMORS",
-      startTime: Math.floor(Date.now()),
+      startTime: start,
       order: "DESC",
       page: page || 1,
       limit: pageSize || 10,
