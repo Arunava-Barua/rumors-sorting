@@ -70,7 +70,6 @@ const getConfessions = async (page, pageSize = 10) => {
         enums: String,
         bytes: String,
       });
-      console.log("Confession Object:", confessionObject);
       console.log(
         JSON.stringify({
           ...confessionObject,

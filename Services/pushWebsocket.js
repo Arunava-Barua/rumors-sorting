@@ -27,9 +27,6 @@ const startWebsocket = async () => {
 
   // Subscribe to block updates using the custom filter
   await pushChain.ws.subscribe(async (block) => {
-    console.log("New block received:", block.blockHash);
-    console.log(block);
-
     // Iterate over each transaction in the block
     for (const tx of block.transactions) {
       // Check when a new rumour has been posted
@@ -58,11 +55,9 @@ const startWebsocket = async () => {
               bytes: String,
             });
 
-            // TODO: Append the new row to the table
             await addSingleRumour({ ...confessionObject, txnHash: tx.hash });
-            console.log(confessionObject);
           } else {
-            console.log(`No details found for transaction hash ${tx.hash}`);
+            console.warn(`No details found for transaction hash ${tx.hash}`);
           }
         } catch (error) {
           console.error("Error fetching transaction details:", error);
@@ -93,13 +88,9 @@ const startWebsocket = async () => {
               bytes: String,
             });
 
-            // TODO: Check if the address is present in the downvote array for same hash in DB
-            // TODO: If yes, remove it
-            // TODO: Update the upvote array with the hash table
-            console.log(upvoteObject);
             await updateVotes(1, upvoteObject);
           } else {
-            console.log(`No details found for transaction hash ${tx.hash}`);
+            console.warn(`No details found for transaction hash ${tx.hash}`);
           }
         } catch (error) {
           console.error("Error fetching transaction details:", error);
@@ -108,7 +99,7 @@ const startWebsocket = async () => {
       // RUMORS:DOWNVOTES
       if (tx.category === "RUMORS:DOWNVOTES") {
         console.log(
-          `🟢Found transaction with hash ${tx.hash} and category ${tx.category}`
+          `🔴Found transaction with hash ${tx.hash} and category ${tx.category}`
         );
         try {
           // Fetch the full transaction details using the transaction hash
@@ -130,13 +121,9 @@ const startWebsocket = async () => {
               bytes: String,
             });
 
-            // TODO: Check if the address is present in the upvotes array for same hash in DB
-            // TODO: If yes, remove it
-            // TODO: Update the downvote array with the hash table
-            console.log(downvoteObject);
             await updateVotes(0, downvoteObject);
           } else {
-            console.log(`No details found for transaction hash ${tx.hash}`);
+            console.warn(`No details found for transaction hash ${tx.hash}`);
           }
         } catch (error) {
           console.error("Error fetching transaction details:", error);
