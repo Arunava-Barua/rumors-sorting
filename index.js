@@ -22,13 +22,20 @@ app.use(express.json());
 const allowedOrigins = [
   "https://your-frontend-domain.com",
   "http://localhost:3000",
+  "http://192.168.31.144",
 ];
 app.use(
   cors({
     origin: function (origin, callback) {
-      // allow requests with no origin (like mobile apps, curl, Postman)
-      if (!origin) return callback(null, true);
-      if (allowedOrigins.includes(origin)) {
+      const env = process.env.ENVIRONMENT;
+
+      if (env === "DEV") {
+        return callback(null, true); // Allow all in development
+      }
+
+      if (!origin) return callback(null, true); // Allow Postman/mobile/etc.
+
+      if (env === "PROD" && allowedOrigins.includes(origin)) {
         return callback(null, true);
       } else {
         return callback(new Error("Not allowed by CORS"));
@@ -36,6 +43,7 @@ app.use(
     },
   })
 );
+
 app.use(helmet());
 
 const PORT = 3001;
@@ -47,7 +55,7 @@ app.use("/websocket", websocketRoute);
 
 app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`);
-  
+
   // Start the job scheduler
   console.log("Starting job scheduler...");
   jobScheduler();
