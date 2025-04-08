@@ -10,7 +10,7 @@ const getLastRumourTimestamp = async () => {
     );
 
     if (rows.length > 0) {
-      return new Date(rows[0].timestamp).getTime();
+      return rows[0].timestamp;
     } else {
       return new Date.now().getTime();
     }
@@ -22,26 +22,45 @@ const getLastRumourTimestamp = async () => {
 
 const getAndStoreRumours = async () => {
   try {
-    const startTime = await getLastRumourTimestamp();
+    let startTime = await getLastRumourTimestamp();
+    console.log("Start Time: ", startTime)
 
     let page = 1;
     let allConfessions = [];
     let confessions;
 
-    do {
-      confessions = await getConfessions(page, 30, startTime);
+    while (true) {
+      const currentTimestamp = Date.now();
+      console.log("Current Timestamp: ", currentTimestamp)
+
+      if (startTime >= currentTimestamp) {
+        console.log("Reached up-to-date timestamp. Stopping the loop ⏹️");
+        break;
+      }
+
+      confessions = await getConfessions(page, 10, startTime, order = "ASC");
+
+      if (confessions.length === 0) {
+        console.log("No new confessions found.");
+        break;
+      }
+
       allConfessions = allConfessions.concat(confessions);
-      page++;
 
       console.log("Adding rumours to DB");
       await addRumours(allConfessions);
       console.log("Added rumours to DB");
+
+      // Update startTime with the latest timestamp
+      startTime = await getLastRumourTimestamp();
+
       allConfessions = [];
+      page++;
 
       console.log("Starting the wait🟢");
       await new Promise((resolve) => setTimeout(resolve, 60000)); // Wait for 1 minute
       console.log("Wait Ended🔴");
-    } while (confessions.length > 0);
+    }
   } catch (error) {
     console.error("Error in getAndStoreRumours:", error);
   }

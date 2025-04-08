@@ -22,4 +22,6 @@ const jobScheduler = async () => {
   );
 };
 
+// jobScheduler()
+
 module.exports = { jobScheduler };
