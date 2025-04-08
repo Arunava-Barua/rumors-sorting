@@ -16,7 +16,7 @@ const jobScheduler = async () => {
   schedule.scheduleJob(
     { start: startTime, rule: oneMinuteRule },
     async function () {
-      console.log("The answer to life, the universe, and everything!");
+      console.log("Job running for rumour history syncing");
       await getAndStoreRumours();
     }
   );
