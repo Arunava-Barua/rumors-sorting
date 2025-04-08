@@ -1,7 +1,10 @@
 const { getRumoursByOwner } = require("../Models/getRumoursByOwner.js");
+const { getAndStoreRumours } = require("../jobs/getAndStoreRumours.js");
 
 const userRumours = async (req, res) => {
   try {
+    await getAndStoreRumours();
+
     const { walletAddress } = req.params;
     const response = await getRumoursByOwner(walletAddress);
     const data = response.rumours || [];
@@ -16,8 +19,8 @@ const userRumours = async (req, res) => {
         data,
         meta: {
           total: data.length,
-          paginated: false
-        }
+          paginated: false,
+        },
       });
     }
 
@@ -38,8 +41,8 @@ const userRumours = async (req, res) => {
         pageSize,
         totalPages,
         hasNextPage: pageNumber < totalPages,
-        hasPrevPage: pageNumber > 1
-      }
+        hasPrevPage: pageNumber > 1,
+      },
     });
   } catch (error) {
     res.status(500).json({ message: error.message });

@@ -1,7 +1,10 @@
 const { getAllRumours } = require("../Models/getAllRumours.js");
+const { getAndStoreRumours } = require("../jobs/getAndStoreRumours.js");
 
 const getSortedRumours = async (req, res) => {
   try {
+    await getAndStoreRumours();
+
     const { rumours } = await getAllRumours();
 
     const sortedRumours = rumours.sort((a, b) => {

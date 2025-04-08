@@ -3,5 +3,15 @@ const { runWebsocket } = require("./runWebsocket.controller.js");
 const { userRumours } = require("./userRumours.controller.js");
 const { getLatestRumours } = require("./getLatestRumours.controller.js");
 const { getSortedRumours } = require("./getSortedRumours.controller.js");
+const {
+  runWebsocketMonitoring,
+} = require("./runMonitoringWebsocket.controller.js");
 
-module.exports = { getApiRumours, runWebsocket, userRumours, getLatestRumours, getSortedRumours };
+module.exports = {
+  getApiRumours,
+  runWebsocket,
+  userRumours,
+  getLatestRumours,
+  getSortedRumours,
+  runWebsocketMonitoring,
+};

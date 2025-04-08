@@ -1,7 +1,10 @@
 const { getAllRumours } = require("../Models/getAllRumours.js");
+const { getAndStoreRumours } = require("../jobs/getAndStoreRumours.js");
 
 const getLatestRumours = async (req, res) => {
   try {
+    await getAndStoreRumours(); // Ensure the latest rumours are fetched and stored
+    
     const response = await getAllRumours();
     const data = response.rumours || [];
 

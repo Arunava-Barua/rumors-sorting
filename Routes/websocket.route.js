@@ -3,8 +3,12 @@
 const express = require("express");
 const router = express.Router();
 
-const { runWebsocket } = require("../Controller/runWebsocket.controller.js");
+const {
+  runWebsocket,
+  runWebsocketMonitoring,
+} = require("../Controller/index.js");
 
 router.get("/", runWebsocket);
+router.get("/monitoring", runWebsocketMonitoring);
 
 module.exports = { websocketRoute: router };

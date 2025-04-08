@@ -3,6 +3,8 @@ const cors = require("cors");
 
 const helmet = require("helmet");
 
+const { jobScheduler } = require("./jobs/jobScheduler.js");
+
 require("dotenv").config();
 
 const {
@@ -15,7 +17,25 @@ const app = express();
 
 // Middleware for json body
 app.use(express.json());
-app.use(cors()); // Access-Control-Allow-Origin (Response) can be set to the Origin (Request) header: {origin: "https://url.com"}
+
+// CORS: Allow only your frontend domain
+const allowedOrigins = [
+  "https://your-frontend-domain.com",
+  "http://localhost:3000",
+];
+app.use(
+  cors({
+    origin: function (origin, callback) {
+      // allow requests with no origin (like mobile apps, curl, Postman)
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.includes(origin)) {
+        return callback(null, true);
+      } else {
+        return callback(new Error("Not allowed by CORS"));
+      }
+    },
+  })
+);
 app.use(helmet());
 
 const PORT = 3001;
@@ -27,9 +47,11 @@ app.use("/websocket", websocketRoute);
 
 app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`);
+  
+  // Start the job scheduler
+  console.log("Starting job scheduler...");
+  jobScheduler();
 });
 app.get("/", function (req, res) {
   res.send("Hello World everyone! Server for Rumors Dapp");
 });
-
-

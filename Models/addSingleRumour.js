@@ -23,10 +23,10 @@ async function addSingleRumour(rumour) {
       address,
     } = rumour;
 
-    const formattedTimestamp = new Date(parseInt(timestamp))
-      .toISOString()
-      .slice(0, 19)
-      .replace("T", " ");
+    // const formattedTimestamp = new Date(parseInt(timestamp))
+    //   .toISOString()
+    //   .slice(0, 19)
+    //   .replace("T", " ");
 
     // Convert upvotes and downvotes to JSON strings
     const upvotes = JSON.stringify(upvoteWallets || []);
@@ -41,7 +41,7 @@ async function addSingleRumour(rumour) {
       txnHash,
       upvotes, // Now a valid JSON string
       downvotes, // Now a valid JSON string
-      formattedTimestamp,
+      timestamp,
       post,
       address, // Storing the address in the "owner" column
     ]);

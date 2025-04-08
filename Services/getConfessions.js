@@ -4,11 +4,11 @@ const protobuf = require("protobufjs");
 
 const { calculateVote } = require("./calculateVote.js");
 
-
 const getConfessions = async (
   page,
   pageSize = 30,
-  start = Math.floor(Date.now())
+  start = Math.floor(Date.now()),
+  order = "DESC"
 ) => {
   try {
     // Initialize PushNetwork class instance
@@ -42,7 +42,7 @@ const getConfessions = async (
       raw: true,
       category: "CUSTOM:RUMORS",
       startTime: start,
-      order: "DESC",
+      order: order,
       page: page || 1,
       limit: pageSize || 10,
     });
