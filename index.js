@@ -57,8 +57,8 @@ app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`);
 
   // Start the job scheduler
-  console.log("Starting job scheduler...");
-  jobScheduler();
+  // console.log("Starting job scheduler...");
+  // jobScheduler();
 });
 app.get("/", function (req, res) {
   res.send("Hello World everyone! Server for Rumors Dapp");

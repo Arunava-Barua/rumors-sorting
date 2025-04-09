@@ -1,9 +1,11 @@
 const { PushChain } = require("@pushchain/devnet");
 
-const { Confession, Upvotes, Downvotes } = require("../Schema/schema.js");
+const { Confession } = require("../Schema/schema.js");
 
 const { addSingleRumour } = require("../Models/addSingleRumour.js");
 const { updateVotes } = require("./updateVotes.js");
+
+const { parseTxData } = require("../utils/parseTxData.js");
 
 const startWebsocket = async () => {
   console.log("Starting websocket...");
@@ -75,18 +77,8 @@ const startWebsocket = async () => {
           // Assume the fetched result contains a list of blocks and each block contains an array of transactions
           if (txDetails.blocks && txDetails.blocks.length > 0) {
             const fetchedTx = txDetails.blocks[0].transactions[0];
-            // Log the transaction data from the fetched transaction details
-            const dataBytes = new Uint8Array(
-              Buffer.from(fetchedTx.data, "hex")
-            );
-            const decodedData = Upvotes.decode(dataBytes);
 
-            // Convert to plain object
-            const upvoteObject = Upvotes.toObject(decodedData, {
-              longs: String,
-              enums: String,
-              bytes: String,
-            });
+            const upvoteObject = parseTxData(fetchedTx.data);
 
             await updateVotes(1, upvoteObject, pushChain);
           } else {
@@ -109,17 +101,7 @@ const startWebsocket = async () => {
           if (txDetails.blocks && txDetails.blocks.length > 0) {
             const fetchedTx = txDetails.blocks[0].transactions[0];
             // Log the transaction data from the fetched transaction details
-            const dataBytes = new Uint8Array(
-              Buffer.from(fetchedTx.data, "hex")
-            );
-            const decodedData = Downvotes.decode(dataBytes);
-
-            // Convert to plain object
-            const downvoteObject = Downvotes.toObject(decodedData, {
-              longs: String,
-              enums: String,
-              bytes: String,
-            });
+            const downvoteObject = parseTxData(fetchedTx.data);
 
             await updateVotes(0, downvoteObject, pushChain);
           } else {

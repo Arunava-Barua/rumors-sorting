@@ -3,7 +3,7 @@ const { getAndStoreRumours } = require("../jobs/getAndStoreRumours.js");
 
 const getSortedRumours = async (req, res) => {
   try {
-    await getAndStoreRumours();
+    // await getAndStoreRumours();
 
     const { rumours } = await getAllRumours();
 

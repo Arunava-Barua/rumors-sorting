@@ -3,6 +3,8 @@ const { Confession, Upvotes, Downvotes } = require("../Schema/schema.js");
 const { addSingleRumour } = require("../Models/addSingleRumour.js");
 const { updateVotes } = require("./updateVotes.js");
 
+const { parseTxData } = require("../utils/parseTxData.js");
+
 let pushChain;
 let subscriptionId = null;
 
@@ -41,20 +43,10 @@ const handleTx = async (tx) => {
       });
       await addSingleRumour({ ...object, txnHash: tx.hash });
     } else if (category === "RUMORS:UPVOTES") {
-      const decoded = Upvotes.decode(dataBytes);
-      const object = Upvotes.toObject(decoded, {
-        longs: String,
-        enums: String,
-        bytes: String,
-      });
+      const object = parseTxData(fetchedTx.data);
       await updateVotes(1, object, pushChain);
     } else if (category === "RUMORS:DOWNVOTES") {
-      const decoded = Downvotes.decode(dataBytes);
-      const object = Downvotes.toObject(decoded, {
-        longs: String,
-        enums: String,
-        bytes: String,
-      });
+      const object = parseTxData(fetchedTx.data);
       await updateVotes(0, object, pushChain);
     }
   } catch (error) {

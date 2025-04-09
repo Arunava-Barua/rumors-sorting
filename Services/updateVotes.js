@@ -32,7 +32,7 @@ const updateVotes = async (voteType, voteObject, pushChain) => {
           bytes: String,
         });
 
-        await addSingleRumour({ ...confessionObject, txnHash: tx.hash });
+        await addSingleRumour({ ...confessionObject, txnHash: rumourHash });
       }
 
       existingVote = await getRumourByTxnHash(rumourHash);
