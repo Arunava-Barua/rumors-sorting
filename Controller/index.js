@@ -6,6 +6,7 @@ const { getSortedRumours } = require("./getSortedRumours.controller.js");
 const {
   runWebsocketMonitoring,
 } = require("./runMonitoringWebsocket.controller.js");
+const { getRumourDetailsByHash } = require("./getRumourDetailsByHash.controller.js");
 
 module.exports = {
   getApiRumours,
@@ -14,4 +15,5 @@ module.exports = {
   getLatestRumours,
   getSortedRumours,
   runWebsocketMonitoring,
+  getRumourDetailsByHash
 };

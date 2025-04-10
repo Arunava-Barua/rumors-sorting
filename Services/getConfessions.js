@@ -52,41 +52,39 @@ const getConfessions = async (
     for (let i = 0; i < txRes.blocks.length; i++) {
       const block = txRes.blocks[i];
 
-      const { upvoteWallets, downvoteWallets } = await calculateVote(
-        userAlice,
-        block.transactions[0].hash
-        // "52df1b8feb2a06b2a3f2a116d8acdfbc649a853f977426ebda2de0d1988ef65a"
-      );
+      try {
+        const { upvoteWallets, downvoteWallets } = await calculateVote(
+          userAlice,
+          block.transactions[0].hash
+        );
 
-      const dataBytes = new Uint8Array(
-        Buffer.from(block.transactions[0].data, "hex")
-      );
+        const txData = block.transactions[0].data;
 
-      const decodedData = Confession.decode(dataBytes);
+        // Try decoding the hex string
+        const dataBytes = new Uint8Array(Buffer.from(txData, "hex"));
+        const decodedData = Confession.decode(dataBytes);
 
-      // Convert to plain object
-      const confessionObject = Confession.toObject(decodedData, {
-        longs: String,
-        enums: String,
-        bytes: String,
-      });
-      console.log(
-        JSON.stringify({
+        // Convert to plain object
+        const confessionObject = Confession.toObject(decodedData, {
+          longs: String,
+          enums: String,
+          bytes: String,
+        });
+
+        confessions.push({
           ...confessionObject,
           markdownPost: decodedData.post,
           txnHash: block.transactions[0].hash,
-          upvoteWallets: upvoteWallets,
-          downvoteWallets: downvoteWallets,
-        })
-      );
-
-      confessions.push({
-        ...confessionObject,
-        markdownPost: decodedData.post,
-        txnHash: block.transactions[0].hash,
-        upvoteWallets: upvoteWallets,
-        downvoteWallets: downvoteWallets,
-      });
+          upvoteWallets,
+          downvoteWallets,
+        });
+      } catch (err) {
+        console.warn(
+          `⏭️ Skipping block index ${i} due to decoding error or invalid hex:`,
+          err.message
+        );
+        continue; // Skip this iteration if data is not a valid hex or decoding fails
+      }
     }
 
     return confessions;

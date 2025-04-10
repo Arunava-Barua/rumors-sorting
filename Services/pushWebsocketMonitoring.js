@@ -32,16 +32,19 @@ const handleTx = async (tx) => {
     const fetchedTx = txDetails?.blocks?.[0]?.transactions?.[0];
     if (!fetchedTx) return console.warn(`No details found for tx ${tx.hash}`);
 
-    const dataBytes = new Uint8Array(Buffer.from(fetchedTx.data, "hex"));
-
     if (category === "CUSTOM:RUMORS") {
-      const decoded = Confession.decode(dataBytes);
-      const object = Confession.toObject(decoded, {
-        longs: String,
-        enums: String,
-        bytes: String,
-      });
-      await addSingleRumour({ ...object, txnHash: tx.hash });
+      try {
+        const dataBytes = new Uint8Array(Buffer.from(fetchedTx.data, "hex"));
+        const decoded = Confession.decode(dataBytes);
+        const object = Confession.toObject(decoded, {
+          longs: String,
+          enums: String,
+          bytes: String,
+        });
+        await addSingleRumour({ ...object, txnHash: tx.hash });
+      } catch (error) {
+        return;
+      }
     } else if (category === "RUMORS:UPVOTES") {
       const object = parseTxData(fetchedTx.data);
       await updateVotes(1, object, pushChain);

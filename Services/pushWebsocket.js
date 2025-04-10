@@ -44,20 +44,28 @@ const startWebsocket = async () => {
           // Assume the fetched result contains a list of blocks and each block contains an array of transactions
           if (txDetails.blocks && txDetails.blocks.length > 0) {
             const fetchedTx = txDetails.blocks[0].transactions[0];
-            // Log the transaction data from the fetched transaction details
-            const dataBytes = new Uint8Array(
-              Buffer.from(fetchedTx.data, "hex")
-            );
-            const decodedData = Confession.decode(dataBytes);
 
-            // Convert to plain object
-            const confessionObject = Confession.toObject(decodedData, {
-              longs: String,
-              enums: String,
-              bytes: String,
-            });
+            try {
+              // Log the transaction data from the fetched transaction details
+              const dataBytes = new Uint8Array(
+                Buffer.from(fetchedTx.data, "hex")
+              );
+              const decodedData = Confession.decode(dataBytes);
 
-            await addSingleRumour({ ...confessionObject, txnHash: tx.hash });
+              // Convert to plain object
+              const confessionObject = Confession.toObject(decodedData, {
+                longs: String,
+                enums: String,
+                bytes: String,
+              });
+
+              await addSingleRumour({ ...confessionObject, txnHash: tx.hash });
+            } catch (error) {
+              console.warn(
+                `⏭️ Skipping block due to decoding error or invalid hex:`
+              );
+              continue;
+            }
           } else {
             console.warn(`No details found for transaction hash ${tx.hash}`);
           }
