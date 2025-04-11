@@ -4,6 +4,8 @@ async function addRumours(rumours) {
   try {
     let insertedCount = 0;
 
+    console.log(rumours);
+
     for (const obj of rumours) {
       const {
         txnHash,
@@ -13,10 +15,12 @@ async function addRumours(rumours) {
         post,
         address,
       } = obj;
-      // const formattedTimestamp = new Date(parseInt(timestamp))
-      //   .toISOString()
-      //   .slice(0, 19)
-      //   .replace("T", " ");
+
+      // Skip if any required field is missing
+      if (!txnHash || !timestamp || !post || !address) {
+        console.warn(`Skipping incomplete entry`);
+        continue;
+      }
 
       // Convert upvotes and downvotes to JSON strings
       const upvotes = JSON.stringify(upvoteWallets);

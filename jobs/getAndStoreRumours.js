@@ -23,22 +23,29 @@ const getLastRumourTimestamp = async () => {
 const getAndStoreRumours = async () => {
   try {
     let startTime = await getLastRumourTimestamp();
-    console.log("Start Time: ", startTime)
+    console.log("Start Time: ", startTime);
 
+    const pageSize = 10;
     let page = 1;
+
     let allConfessions = [];
     let confessions;
 
     while (true) {
       const currentTimestamp = Date.now();
-      console.log("Current Timestamp: ", currentTimestamp)
+      console.log("Current Timestamp: ", currentTimestamp);
 
       if (startTime >= currentTimestamp) {
         console.log("Reached up-to-date timestamp. Stopping the loop ⏹️");
         break;
       }
 
-      confessions = await getConfessions(page, 10, startTime, order = "ASC");
+      confessions = await getConfessions(
+        page,
+        pageSize,
+        startTime,
+        (order = "ASC")
+      );
 
       if (confessions.length === 0) {
         console.log("No new confessions found.");
@@ -56,6 +63,11 @@ const getAndStoreRumours = async () => {
 
       allConfessions = [];
       page++;
+
+      if (confessions.length <= pageSize) {
+        console.log("Confessions less than pageSize.");
+        break;
+      }
 
       console.log("Starting the wait🟢");
       await new Promise((resolve) => setTimeout(resolve, 60000)); // Wait for 1 minute

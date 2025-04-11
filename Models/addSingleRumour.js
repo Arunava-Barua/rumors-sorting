@@ -28,6 +28,12 @@ async function addSingleRumour(rumour) {
     //   .slice(0, 19)
     //   .replace("T", " ");
 
+    // Skip if any required field is missing
+    if (!txnHash || !timestamp || !post || !address) {
+      console.warn(`Skipping incomplete entry`);
+      return { error: false, inserted: 0 };
+    }
+
     // Convert upvotes and downvotes to JSON strings
     const upvotes = JSON.stringify(upvoteWallets || []);
     const downvotes = JSON.stringify(downvoteWallets || []);

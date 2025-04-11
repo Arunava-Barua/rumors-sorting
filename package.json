@@ -11,7 +11,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@pushchain/devnet": "1.0.15",
+    "@pushchain/devnet": "1.0.16",
     "@pushprotocol/push-chain": "^0.1.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
