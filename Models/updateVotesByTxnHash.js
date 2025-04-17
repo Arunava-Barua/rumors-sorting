@@ -1,33 +1,30 @@
 const { pool } = require("./database.js");
 
-async function updateVotesByTxnHash(txnHash, upvoteWallets, downvoteWallets) {
+async function updateVotesByTxnHash(rumourHash, upvoteCount, downvoteCount, voteHash) {
   try {
     const query = `
-      UPDATE rumours
+      UPDATE RumoursDetails
       SET upvotes = ?, downvotes = ?
-      WHERE transactionHash = ?
+      WHERE rumourHash = ?
     `;
 
-    const upvotesJSON = JSON.stringify(upvoteWallets);
-    const downvotesJSON = JSON.stringify(downvoteWallets);
-
     const [result] = await pool.query(query, [
-      upvotesJSON,
-      downvotesJSON,
-      txnHash,
+      upvoteCount,
+      downvoteCount,
+      rumourHash,
     ]);
 
     if (result.affectedRows === 0) {
       return {
         error: true,
-        message: "No entry found with this transaction hash",
+        message: "No entry found with this rumourHash",
       };
     }
 
-    console.log(`Updated votes for txnHash: ${txnHash}`);
-    return { error: false, message: "Votes updated successfully" };
+    console.log(`🔄 Updated vote counts for: ${rumourHash}`);
+    return { error: false, message: "Votes updated" };
   } catch (error) {
-    console.error("Error updating votes:", error.message);
+    console.error("❌ Failed to update vote counts:", error.message);
     return { error: true, message: error.message };
   }
 }

@@ -8,8 +8,7 @@ const { jobScheduler } = require("./jobs/jobScheduler.js");
 require("dotenv").config();
 
 const {
-  sortRoute,
-  ownerRumourRoute,
+  rumoursRoute,
   websocketRoute,
 } = require("./Routes/index.js");
 
@@ -49,16 +48,15 @@ app.use(helmet());
 const PORT = 3001;
 
 // Routes
-app.use("/api/sort", sortRoute);
-app.use("/api/my-rumours", ownerRumourRoute);
+app.use("/api/rumours", rumoursRoute);
 app.use("/websocket", websocketRoute);
 
 app.listen(PORT, () => {
   console.log(`Listening on port ${PORT}`);
 
   // Start the job scheduler
-  // console.log("Starting job scheduler...");
-  // jobScheduler();
+  console.log("Starting job scheduler...");
+  jobScheduler();
 });
 app.get("/", function (req, res) {
   res.send("Hello World everyone! Server for Rumors Dapp");

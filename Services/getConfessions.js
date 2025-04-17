@@ -1,4 +1,3 @@
-// const { PushNetwork } = require("@pushprotocol/push-chain");
 const { PushChain } = require("@pushchain/devnet");
 const protobuf = require("protobufjs");
 
@@ -35,6 +34,9 @@ const getConfessions = async (
     const Confession = root.lookupType("Confession");
 
     const confessions = [];
+
+    // Past==========================Current=========================Future
+    // Last Timestamp
 
     console.log("🔵Calling tx.get()");
     // fetch transactions

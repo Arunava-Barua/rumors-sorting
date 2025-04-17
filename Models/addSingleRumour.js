@@ -13,55 +13,78 @@ const exampleRumour = {
 };
 
 async function addSingleRumour(rumour) {
+  const {
+    txnHash,
+    upvoteWallets = [],
+    downvoteWallets = [],
+    timestamp,
+    post,
+    address,
+  } = rumour;
+
+  const rumourHash = txnHash;
+
+  // Skip if any required field is missing
+  if (!txnHash || !timestamp || !post || !address) {
+    console.warn(`Skipping incomplete entry`);
+    return { error: false, inserted: 0 };
+  }
+
+  const connection = await pool.getConnection();
+  await connection.beginTransaction();
+
   try {
-    const {
-      txnHash,
-      upvoteWallets,
-      downvoteWallets,
-      timestamp,
+    // 1. Meta table insert
+    const metaQuery = `
+        INSERT INTO Meta (rumourHash, timestamp)
+        VALUES (?, ?)
+      `;
+    await connection.query(metaQuery, [rumourHash, timestamp]);
+
+    // 2. RumoursDetails insert
+    const detailsQuery = `
+        INSERT INTO RumoursDetails (rumourHash, post, owner, upvotes, downvotes)
+        VALUES (?, ?, ?, ?, ?)
+      `;
+    await connection.query(detailsQuery, [
+      rumourHash,
       post,
       address,
-    } = rumour;
-
-    // const formattedTimestamp = new Date(parseInt(timestamp))
-    //   .toISOString()
-    //   .slice(0, 19)
-    //   .replace("T", " ");
-
-    // Skip if any required field is missing
-    if (!txnHash || !timestamp || !post || !address) {
-      console.warn(`Skipping incomplete entry`);
-      return { error: false, inserted: 0 };
-    }
-
-    // Convert upvotes and downvotes to JSON strings
-    const upvotes = JSON.stringify(upvoteWallets || []);
-    const downvotes = JSON.stringify(downvoteWallets || []);
-
-    const query = `
-            INSERT INTO rumours (transactionHash, upvotes, downvotes, timestamp, post, owner)
-            VALUES (?, ?, ?, ?, ?, ?)
-          `;
-
-    const [result] = await pool.query(query, [
-      txnHash,
-      upvotes, // Now a valid JSON string
-      downvotes, // Now a valid JSON string
-      timestamp,
-      post,
-      address, // Storing the address in the "owner" column
+      upvoteWallets.length,
+      downvoteWallets.length,
     ]);
 
-    console.log(`Successfully inserted 1 row with txnHash: ${txnHash}`);
-    return { error: false, inserted: result.affectedRows };
-  } catch (error) {
-    if (error.message.includes("Duplicate entry")) {
-      console.warn(`Skipping duplicate entry for txnHash: ${rumour.txnHash}`);
-      return { error: true, message: "Duplicate entry" };
-    } else {
-      console.error("Error performing insert:", error.message);
-      return { error: true, message: error.message };
+    // 3. Upvotes into RumoursMeta
+    const metaInsertQuery = `
+        INSERT INTO RumoursMeta (rumourHash, transactionHash, type, userAddress)
+        VALUES (?, ?, ?, ?)
+      `;
+
+    for (const wallet of upvoteWallets) {
+      await connection.query(metaInsertQuery, [rumourHash, txnHash, 1, wallet]);
     }
+
+    // 4. Downvotes into RumoursMeta
+    for (const wallet of downvoteWallets) {
+      await connection.query(metaInsertQuery, [rumourHash, txnHash, 0, wallet]);
+    }
+
+    await connection.commit();
+    connection.release();
+
+    console.log(`✅ Inserted rumour: ${txnHash}`);
+    return { error: false, inserted: 1 };
+  } catch (error) {
+    await connection.rollback();
+    connection.release();
+
+    if (error.code === "ER_DUP_ENTRY") {
+      console.warn(`⚠️ Duplicate entry skipped for txnHash: ${txnHash}`);
+      return { error: true, message: "Duplicate entry" };
+    }
+
+    console.error("❌ Insert failed:", error.message);
+    return { error: true, message: error.message };
   }
 }
 

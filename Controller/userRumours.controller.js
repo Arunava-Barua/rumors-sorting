@@ -3,49 +3,37 @@ const { getAndStoreRumours } = require("../jobs/getAndStoreRumours.js");
 
 const userRumours = async (req, res) => {
   try {
-    await getAndStoreRumours();
+    // await getAndStoreRumours();
 
     const { walletAddress } = req.params;
-    const response = await getRumoursByOwner(walletAddress);
-    const data = response.rumours || [];
-
-    const pageNumber = parseInt(req.query.pageNumber);
-    const pageSize = parseInt(req.query.pageSize);
-
-    // If no pagination params are given, return full data
-    if (!pageNumber || !pageSize) {
-      return res.status(200).json({
-        message: "Rumours by owner (no pagination)",
-        data,
-        meta: {
-          total: data.length,
-          paginated: false,
-        },
-      });
+    if (!walletAddress) {
+      return res.status(400).json({ message: "walletAddress is required" });
     }
 
-    // Pagination logic
-    const total = data.length;
-    const totalPages = Math.ceil(total / pageSize);
-    const startIndex = (pageNumber - 1) * pageSize;
-    const endIndex = pageNumber * pageSize;
+    const page = parseInt(req.query.page) || 1;
+    const limit = Math.min(parseInt(req.query.limit) || 25, 100);
 
-    const paginatedData = data.slice(startIndex, endIndex);
+    const result = await getRumoursByOwner(walletAddress, page, limit);
+
+    if (result.error) {
+      return res
+        .status(500)
+        .json({ message: result.message || "Failed to fetch rumours" });
+    }
 
     res.status(200).json({
-      message: "Rumours by owner (paginated)",
-      data: paginatedData,
+      message: "Rumours by owner",
+      data: result.rumours,
       meta: {
-        total,
-        pageNumber,
-        pageSize,
-        totalPages,
-        hasNextPage: pageNumber < totalPages,
-        hasPrevPage: pageNumber > 1,
+        page: result.pagination.page,
+        limit: result.pagination.limit,
+        count: result.rumours.length,
+        paginated: true,
       },
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("❌ userRumours error:", error.message);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 

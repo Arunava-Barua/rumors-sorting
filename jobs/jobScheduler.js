@@ -14,7 +14,7 @@ const jobScheduler = async () => {
   oneHourRule.second = 0;
 
   schedule.scheduleJob(
-    { start: startTime, rule: oneMinuteRule },
+    { start: startTime, rule: oneHourRule },
     async function () {
       console.log("Job running for rumour history syncing");
       await getAndStoreRumours();

@@ -47,10 +47,10 @@ const handleTx = async (tx) => {
       }
     } else if (category === "RUMORS:UPVOTES") {
       const object = parseTxData(fetchedTx.data);
-      await updateVotes(1, object, pushChain);
+      await updateVotes(1, object, tx.hash, pushChain);
     } else if (category === "RUMORS:DOWNVOTES") {
       const object = parseTxData(fetchedTx.data);
-      await updateVotes(0, object, pushChain);
+      await updateVotes(0, object, tx.hash, pushChain);
     }
   } catch (error) {
     console.error("Error handling transaction:", error);
@@ -78,6 +78,7 @@ const subscribeToBlocks = async () => {
   // Subscribe and store subscriptionId
   subscriptionId = await pushChain.ws.subscribe(async (block) => {
     for (const tx of block.transactions) {
+      console.log(tx);
       await handleTx(tx);
     }
   }, customFilters);

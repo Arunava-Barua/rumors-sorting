@@ -1,68 +1,33 @@
-const { getAllRumours } = require("../Models/getAllRumours.js");
+const {
+  getSortedRumoursFromDB,
+} = require("../Models/getSortedRumoursFromDB.js");
 const { getAndStoreRumours } = require("../jobs/getAndStoreRumours.js");
 
 const getSortedRumours = async (req, res) => {
   try {
     // await getAndStoreRumours();
+    const page = parseInt(req.query.page) || 1;
+    const limit = Math.min(parseInt(req.query.limit) || 25, 100);
 
-    const { rumours } = await getAllRumours();
+    const result = await getSortedRumoursFromDB(page, limit);
 
-    const sortedRumours = rumours.sort((a, b) => {
-      const upvotesA = a.upvotes?.length || 0;
-      const upvotesB = b.upvotes?.length || 0;
-      const downvotesA = a.downvotes?.length || 0;
-      const downvotesB = b.downvotes?.length || 0;
-      const timeA = new Date(a.timestamp).getTime();
-      const timeB = new Date(b.timestamp).getTime();
-
-      if (upvotesB !== upvotesA) {
-        return upvotesB - upvotesA; // Descending by upvotes
-      } else if (downvotesA !== downvotesB) {
-        return downvotesA - downvotesB; // Ascending by downvotes
-      } else {
-        return timeB - timeA; // Descending by timestamp
-      }
-    });
-
-    const pageNumber = parseInt(req.query.pageNumber);
-    const pageSize = parseInt(req.query.pageSize);
-
-    // If no pagination params are given, return full data
-    if (!pageNumber || !pageSize) {
-      return res.status(200).json({
-        message:
-          "Rumours sorted by upvotes, downvotes, and timestamp (no pagination)",
-        data: sortedRumours,
-        meta: {
-          total: sortedRumours.length,
-          paginated: false,
-        },
-      });
+    if (result.error) {
+      return res.status(500).json({ message: result.message });
     }
 
-    // Pagination logic
-    const total = sortedRumours.length;
-    const totalPages = Math.ceil(total / pageSize);
-    const startIndex = (pageNumber - 1) * pageSize;
-    const endIndex = pageNumber * pageSize;
-
-    const paginatedData = sortedRumours.slice(startIndex, endIndex);
-
     res.status(200).json({
-      message:
-        "Rumours sorted by upvotes, downvotes, and timestamp (paginated)",
-      data: paginatedData,
+      message: "Sorted rumours from DB (paginated)",
+      data: result.rumours,
       meta: {
-        total,
-        pageNumber,
-        pageSize,
-        totalPages,
-        hasNextPage: pageNumber < totalPages,
-        hasPrevPage: pageNumber > 1,
+        page: result.pagination.page,
+        limit: result.pagination.limit,
+        count: result.pagination.count,
+        paginated: true,
       },
     });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    console.error("❌ Controller error:", error.message);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 

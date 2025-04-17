@@ -3,6 +3,11 @@ const { addRumours } = require("../Models/addRumours.js");
 
 const { getConfessions } = require("../Services/getConfessions.js");
 
+// 1744360669162
+// 1744360698000
+// 1744360669162
+// 1744360669162
+
 const getLastRumourTimestamp = async () => {
   try {
     const [rows] = await pool.query(
@@ -64,7 +69,7 @@ const getAndStoreRumours = async () => {
       allConfessions = [];
       page++;
 
-      if (confessions.length <= pageSize) {
+      if (confessions.length < pageSize) {
         console.log("Confessions less than pageSize.");
         break;
       }
