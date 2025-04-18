@@ -1,6 +1,9 @@
 const {
   getSortedRumoursFromDB,
 } = require("../Models/getSortedRumoursFromDB.js");
+const {
+  getSortedRumoursV2,
+} = require("../Models/getSortedRumoursV2.js");
 const { getAndStoreRumours } = require("../jobs/getAndStoreRumours.js");
 
 const getSortedRumours = async (req, res) => {
@@ -9,7 +12,8 @@ const getSortedRumours = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = Math.min(parseInt(req.query.limit) || 25, 100);
 
-    const result = await getSortedRumoursFromDB(page, limit);
+    // const result = await getSortedRumoursFromDB(page, limit);
+    const result = await getSortedRumoursV2(page, limit);
 
     if (result.error) {
       return res.status(500).json({ message: result.message });
