@@ -4,13 +4,11 @@ const cors = require("cors");
 const helmet = require("helmet");
 
 const { jobScheduler } = require("./jobs/jobScheduler.js");
+const { initDatabase } = require("./Services/initDatabase.js");
 
 require("dotenv").config();
 
-const {
-  rumoursRoute,
-  websocketRoute,
-} = require("./Routes/index.js");
+const { rumoursRoute, websocketRoute } = require("./Routes/index.js");
 
 const app = express();
 
@@ -51,8 +49,18 @@ const PORT = 3001;
 app.use("/api/rumours", rumoursRoute);
 app.use("/websocket", websocketRoute);
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", async () => {
   console.log(`Listening on port ${PORT}`);
+
+  // Step 1: Initialize DB
+  console.log("🛠️ Running DB init...");
+  try {
+    await initDatabase();
+    console.log("✅ Database initialized.");
+  } catch (err) {
+    console.error("❌ Database init failed:", err);
+    process.exit(1); // Stop the server if DB init fails
+  }
 
   // Start the job scheduler
   console.log("Starting job scheduler...");

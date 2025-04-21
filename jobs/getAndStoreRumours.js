@@ -11,7 +11,7 @@ const { getConfessions } = require("../Services/getConfessions.js");
 const getLastRumourTimestamp = async () => {
   try {
     const [rows] = await pool.query(
-      "SELECT timestamp FROM rumours ORDER BY timestamp DESC LIMIT 1"
+      "SELECT timestamp FROM Meta ORDER BY timestamp DESC LIMIT 1"
     );
 
     if (rows.length > 0) {
